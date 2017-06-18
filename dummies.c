@@ -135,7 +135,7 @@ char *strncpy(char *dest, const char *src, size_t n)
 
 
 #ifndef SERIAL
-DUMMY(SetBaudRate)
+DUMMY(SetBaudRate,void)
 #endif
 
 
@@ -147,7 +147,7 @@ void * NewPtr(long need)
 
 int Random()
 {
-#if  defined(hpux) || defined(__EMX__)
+#if __MINGW32__
   return rand();
 #else
   return random();

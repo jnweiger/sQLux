@@ -8,7 +8,7 @@
 #include "QL.h"
 #include "QDOS.h"
 
-#include "QSerial.h"
+//#include "QSerial.h"
 #include "QInstAddr.h"
 #include "boot.h"
 #include "QDOS.h"

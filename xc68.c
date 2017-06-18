@@ -2,6 +2,8 @@
 
 /* fucntions to translate C68 to/from HOST constants and options */
 
+#ifdef IPDEV
+
 #include "xc68.h"
 #include <errno.h>
 #include <stdio.h>
@@ -80,4 +82,6 @@ void xso_x2q(int level,int optname, void* optval,int len)
   
   printf("xso_q2x: proto %d %s, optname %d\n",level,proto,optname);
 }
+
+#endif /*IPDEV*/
 

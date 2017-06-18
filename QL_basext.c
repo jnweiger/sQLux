@@ -10,12 +10,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include <X11/Xos.h>
-#include <X11/Xatom.h>
-#include <X11/Xlib.h> 
-#include <X11/Xutil.h>
-#include <X11/cursorfont.h>
-
 #include "QL.h"
 #include "QLfiles.h"
 #include "QFilesPriv.h"
@@ -572,6 +566,7 @@ bas_err UQLX_getenv()
 
 int do_fork()
 {
+#if 0
     int pid,i;
 
     /* We must close the screen while forking
@@ -600,6 +595,7 @@ int do_fork()
     for (i=0;i<8;i++) sdl_keyrow[i]=0;
 
     return pid;
+#endif
 }
 
 

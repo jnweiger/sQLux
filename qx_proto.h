@@ -6,7 +6,9 @@
  * all sorts of prototype declarations to avoid the ugliest compiler warnings
  */
 
+#ifdef SERIAL
 #include "QSerial.h"
+#endif
 #include "QFilesPriv.h"
 
 extern void InitialSetup(void);
@@ -73,8 +75,11 @@ size_t x_read(int fildes, void *buf, size_t byt);
 void xso_q2x(int level,int optname, void* optval,int len);
 void xso_x2q(int level,int optname, void* optval,int len);
 
+#ifdef SERIAL
 int ser_read(serdev_t *, void *, int );
 int ser_write(serdev_t *, void *, int );
+#endif
+
 void BlockMoveData(void *, void *,long );
 int FSClose(int );
 void RewriteHeader(void);

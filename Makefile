@@ -1,14 +1,35 @@
 # (c) UQLX - see COPYRIGHT
 #
-BUILDFLAGS := -DLINUX -DUSE_IPC -DQVFS -DUSE_IOSZ -DDO_GRAB -DSERIAL \
-	-DNEWSERIAL -DNEWPTY  -DFASTLOOP  -DSH_MEM -DIPDEV  -DXSCREEN -DSOUND \
-	-DUX_WAIT -DHAS_STPCPY -DEVM_SCR -D_GNU_SOURCE -D_XOPEN_SOURCE -DMOUSE
+
+SYS := $(shell $(CC) -dumpmachine)
+EXE :=
+ifneq (, $(findstring linux, $(SYS)))
+	# Do linux things
+	OPT_FLAGS := -DSERIAL -DNEWSERIAL -DNEWPTY -DIPDEV -DUSE_IPC -DSOUND -DUX_WAIT
+else
+ifneq (, $(findstring mingw, $(SYS)))
+	# Do mingw things
+	OPT_FLAGS := -DNO_LOCK
+	EXE := .exe
+else
+ifneq (, $(findstring cygwin, $(SYS)))
+	# Do cygwin things
+else
+	# Do things for others
+endif
+endif
+endif
+
+BUILDFLAGS := -DLINUX -DQVFS -DUSE_IOSZ -DDO_GRAB \
+	-DFASTLOOP  -DSH_MEM -DXSCREEN \
+	-DHAS_STPCPY -DEVM_SCR -D_GNU_SOURCE -D_XOPEN_SOURCE -DMOUSE \
+	-DSWAP_LOAD_IN_MEMORY -DSWAP_STORE_IN_MEMORY
 
 DEBUG = -ggdb
 
 OPTFLAGS = -O2
 
-CFLAGS = $(BUILDFLAGS) $(DEBUG) $(OPTFLAGS)
+CFLAGS = $(BUILDFLAGS) $(DEBUG) $(OPT_FLAGS)
 
 SRC := Init.c general.c instructions_ao.c instructions_pz.c   \
 	QLtraps.c QL_hardware.c QL_config.c dummies.c vm.c \
@@ -19,7 +40,7 @@ SRC := Init.c general.c instructions_ao.c instructions_pz.c   \
 	Xscreen.c QLip.c util.c xc68.c xipc.c script.c \
 	QL_sound.c mach_exception.c \
 	vl.c ide.c block.c unixstuff.c xqlmouse.c \
-	xlmain.c uqlx_cfg.c SDL2screen.c
+	xlmain.c uqlx_cfg.c SDL2screen.c files.c strings.c
 
 OBJ := $(SRC:.c=.o)
 
@@ -31,7 +52,7 @@ EXE_NAME = qlux
 XLIBS := -lSDL2
 
 
-all : $(EXE_NAME)
+all : $(EXE_NAME)$(EXE)
 
 .PHONY : depend
 depend : $(SRC)
@@ -42,8 +63,8 @@ depend : $(SRC)
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
-$(EXE_NAME) : $(OBJ)
-	$(CC) $(LIBS) -o $(EXE_NAME) $(OBJ) $(XLIBS)
+$(EXE_NAME)$(EXE) : $(OBJ)
+	$(CC) $(LIBS) -o $(EXE_NAME)$(EXE) $(OBJ) $(XLIBS)
 
 .PHONY : clean
 clean :

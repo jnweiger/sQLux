@@ -11,7 +11,6 @@
 #endif
 
 /* needed for ntoh? functions */
-#include <arpa/inet.h>
 #include "QLtypes.h"
 
 #undef QM_BIG_ENDIAN
@@ -566,7 +565,7 @@ static inline void _wl_(uw32 *d, uw32 v)
 static inline ruw16 _rw_(uw16 *s)
 {
 #if SWAP_LOAD_IN_MEMORY
-	uw16* x = *(s);
+	uw16 x = *(s);
 	return ((x&0xff)<<8)|((x>>8)&0xff);
 #else
 	return ntohs(*s);

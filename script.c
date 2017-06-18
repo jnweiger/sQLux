@@ -39,10 +39,11 @@ int script_write(void *p, void * buf, int len)
 }
 int script_pend(void *p)
 {
-  if (!script_read_enable)
-    return QERR_NC;
+//  if (!script_read_enable)
+//    return QERR_NC;
 
-  if (check_pend(0,SLC_READ)) return 0;
-  else return QERR_NC;
+// if (check_pend(0,SLC_READ)) return 0;
+//  else return QERR_NC;
+    return 0;
 }
 

@@ -10,24 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/param.h>
-#include <sys/times.h>
 #include <signal.h>
 #include <time.h>
 #include <unistd.h>
-
-
-#ifdef XAW
-#include <X11/Intrinsic.h>
-#include <X11/StringDefs.h>
-#endif
-
-#include <X11/Xos.h>
-#include <X11/Xatom.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#ifdef XAW
-#define BOOLEAN_ALREADY_DEFINED
-#endif
 
 #include "xcodes.h"
 #include "QL.h"
@@ -43,14 +28,6 @@
 #include "util.h"
 #include "xipc.h"
  
-#ifdef XAW
-extern Widget bitMap;
-/*extern short xmouse;*/
-#else
-extern Display *display;
-extern Window imagewin;
-#endif
-
 /*extern int schedCount;*/
 extern int inside;
 extern int screen_drawable;
@@ -119,11 +96,12 @@ void do_hotactn()
   hotch[1]=ReadByte(ptrscrdrv+0x8e -0x18);
   hotch[2]=194;
 
-  insert_keyQ(3,hotch);
+  //insert_keyQ(3,hotch);
 }
 
 void paste_into_keyq()
 {
+#if 0
   uw32 saveA3;
 
   do {
@@ -155,6 +133,7 @@ void paste_into_keyq()
   }while(reg[0]==0);
 
   aReg[3]=saveA3;
+#endif
 }
 
 w32 getSCRdriver()
@@ -479,7 +458,7 @@ void SchedulerCmd()
 	}
  
 #ifndef __linux__
-      pause();       
+      //pause();
 #else 
 	{	    
 	    sigset_t mask, oldmask;

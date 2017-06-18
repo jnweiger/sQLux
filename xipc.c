@@ -6,6 +6,9 @@
 /* remote control and message passing */
 
 /*#include "QLtypes.h"*/
+
+#ifdef USE_IPC
+
 #include "QL68000.h"
 
 
@@ -288,3 +291,4 @@ void cleanup_ipc()
   unlink(sock_path);
 }
 
+#endif /*USE_IPC*/

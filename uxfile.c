@@ -31,6 +31,7 @@
 #include "emudisk.h"
 #include "QDOS.h"
 #include "qx_proto.h"
+#include "files.h"
 
 /* DIR_SEPARATOR specifies how directories will be listed, I prefer the unixish variant */
 /* but QPAC2 doesn't */
@@ -751,7 +752,9 @@ definition in unix.h",template);
 #endif
 
   lseek(fd,0,SEEK_SET);
+#ifndef __MINGW32__
   fcntl(fd,F_SETFL,O_RDONLY);
+#endif
   SET_HFILE(f,fd);
 
   return 0;
@@ -1320,7 +1323,7 @@ int QHostIO(struct mdvFile *f,int op, int fstype)
       if ( GET_FILESYS(f)<0 )
       {
 	unlink(GET_FCB(f)->uxname);
-	i=mkdir(GET_FCB(f)->uxname, 0777);
+	i=make_directory(GET_FCB(f)->uxname, 0777);
 	if ( i!=0 ) *reg=QERR_NF;
       }
       else
@@ -1330,7 +1333,7 @@ int QHostIO(struct mdvFile *f,int op, int fstype)
 	strncpy(mount,qdevs[GET_FILESYS(f)].mountPoints[GET_DRIVE(f)],320);
 	qaddpath(mount, GET_FCB(f)->uxname,400);
 	unlink(mount);
-	i=mkdir(mount,0777);
+	i=make_directory(mount,0777);
 	if (i!=0) *reg=QERR_NF;
 	if (fstype==2)
 	  rename_all_files(f,qdevs[GET_FILESYS(f)].mountPoints[GET_DRIVE(f)],GET_FCB(f)->uxname);

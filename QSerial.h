@@ -2,6 +2,7 @@
 
 #ifndef QSERIAL_H
 #define QSERIAL_H
+#ifdef SERIAL
 
 #include <sys/types.h>
 
@@ -60,5 +61,5 @@ int writeio (serdev_t * sd, char *buf, long *pno);
 int readio (serdev_t * sd, char *buf, long *pno, short tc);
 
 #define MAXSERIAL 4
-
+#endif /*SERIAL*/
 #endif

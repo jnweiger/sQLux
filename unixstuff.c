@@ -16,7 +16,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <sys/mman.h>
 #include <time.h>
 
 #include <fcntl.h> 
@@ -130,7 +129,7 @@ int InitDialog ()
       if (access(buf, R_OK | X_OK)) 
          return 0;
 
-      bfpid = qm_fork (cleanup_dialog, 0);
+      //bfpid = qm_fork (cleanup_dialog, 0);
       if (bfpid) 
          return bfpid;
 
@@ -219,7 +218,7 @@ void dosignal ()
    {
       flptest = 0;
       TestCloseDevs ();
-      process_ipc ();
+      //process_ipc ();
    }
   
 #ifndef xx_VTIME
@@ -231,10 +230,10 @@ extern int xbreak;
 void cleanup (int err)
 {
 #ifndef XAW
-   if (HasDialog > 0)
-      kill (HasDialog, SIGINT);
+//   if (HasDialog > 0)
+//      kill (HasDialog, SIGINT);
 
-   cleanup_ipc ();
+   //cleanup_ipc ();
    // FIXME: cleanup SDL
    //if (!script && !xbreak)
    //   x_screen_close ();
@@ -291,6 +290,7 @@ void on_fat_int (int x)
 
 void init_timers ()
 {
+#if 0
    struct itimerval val;
 
 #ifndef VTIME   
@@ -300,6 +300,7 @@ void init_timers ()
    val.it_interval = val.it_value;
 
    setitimer(ITIMER_REAL, &val, NULL);
+#endif
 #endif
 }
 
@@ -388,6 +389,7 @@ static void qm_reaper ()
 
 void init_signals ()
 {
+#if 0
    struct sigaction sac;
    long i;
 
@@ -407,7 +409,7 @@ void init_signals ()
    sigaction(SIGPIPE, &sac, NULL);
 
    sac.sa_handler = ontsignal;
-   sigaction(SIGALRM, &sac, NULL);
+   //sigaction(SIGALRM, &sac, NULL);
 
 #ifndef NSIG
 #define NSIG _NSIG
@@ -426,6 +428,7 @@ void init_signals ()
 #ifdef UX_WAIT
    sac.sa_handler = sigchld_handler;
    sigaction(SIGCHLD, &sac, NULL);
+#endif
 #endif
 }
 
@@ -1034,6 +1037,7 @@ void uqlxInit ()
 #ifdef G_reg
    reg = _reg;
 #endif
+   printf("Patching\n");
    if (!isMinerva)
    {
       table[IPC_CMD_CODE] = UseIPC;        /* installl pseudoops */
@@ -1100,11 +1104,11 @@ void uqlxInit ()
        undoe this effect in init_xscreen() */
       uqlx_protect(qlscreen.qm_lo,qlscreen.qm_len,QX_NONE);
    }
-
+    printf("init timers\n");
    init_timers();
   
    InitialSetup();
-  
+ printf("GOT HERE\n");
    if (isMinerva)
    {
       reg[1]=RTOP&((~16383) | 1 | 2 | 4 | 16);
@@ -1126,7 +1130,7 @@ void QLRun(void)
       exec:
 #endif
    ExecuteChunk(3000);
-   //QLSDLRenderScreen();
+   QLSDLRenderScreen();
 #ifdef UX_WAIT
    if (run_reaper)
       qm_reaper();

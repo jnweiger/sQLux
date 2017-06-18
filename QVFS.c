@@ -217,8 +217,9 @@ void qvf_close(int id, void *priv)
 
 int qvf_pend(qvf_priv *p)
 {
-  if (check_pend(p->fd,SLC_READ)) return 0;
-  else return QERR_NC;
+  //if (check_pend(p->fd,SLC_READ)) return 0;
+  //else return QERR_NC;
+  return 0;
 }
 
 int qvf_read(qvf_priv *p, void *buf, int pno)

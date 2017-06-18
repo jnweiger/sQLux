@@ -7,6 +7,7 @@
 /* some miscelaneous utility fucntions */
 
 /*#include "QLtypes.h"*/
+#if defined(USE_IPC) || defined(IPDEV)
 #include "QL68000.h"
 
 #include <stdio.h>
@@ -26,7 +27,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #endif
-#include <sys/ioctl.h>
+//#include <sys/ioctl.h>
 
 
 #include "QSerial.h"
@@ -74,3 +75,5 @@ int check_pend(int fd,int mode)
   /*return FD_ISSET(fd,xx);*/
   return (res>0);
 }
+
+#endif /*USEIPC || IPDEV*/

@@ -26,6 +26,7 @@
 #include "unix.h"
 #include "QDOS.h"
 #include "qx_proto.h"
+#include "files.h"
 
 #define MDV_ID			0x28b07ae4
 
@@ -314,7 +315,7 @@ void InitRAMDev(char *dev)
 		    }
 		    /*printf("Making dir %s\n",qdevs[i].mountPoints[j]);*/
 		    
-		    mkdir(qdevs[i].mountPoints[j], 0755);
+		    make_directory(qdevs[i].mountPoints[j], 0755);
 		    *ptr = '/';
 		    /*printf("Making dir %s\n",qdevs[i].mountPoints[j]);*/
 		}

@@ -380,7 +380,7 @@ OSErr QFOpenDisk(struct mdvFile *f)
       
       if (QMD.strict_lock)
 	{
-	  xmode=(sbuf.st_mode | S_ISGID) & (~ S_IXGRP );
+	  //xmode=(sbuf.st_mode | S_ISGID) & (~ S_IXGRP );
 	  if (chmod(qdevs[fs].mountPoints[drnum],xmode))
 	    if (errno != EROFS)
 	      perror("warning, could not change mode, locking may not be available");
