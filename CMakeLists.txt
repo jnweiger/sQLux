@@ -21,8 +21,16 @@ else()
 endif()
 
 find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
+include_directories(${SDL2_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(sqlux Init.c QDisk.c QL_basext.c QL_boot.c QL_cconv.c QL_config.c QL_driver.c QL_files.c QL_hardware.c QL_poll.c QL_screen.c QL_serial.c QL_sound.c QLip.c QLserio.c QLtraps.c QVFS.c SDL2screen.c Xscreen.c block.c dummies.c general.c ide.c iexl_general.c instructions_ao.c instructions_pz.c mach_exception.c memaccess.c pty.c qmtrap.c script.c trace.c unixstuff.c uqlx_cfg.c util.c uxfile.c version.c vl.c vm.c xc68.c xcodes.c xipc.c xlmain.c xqlmouse.c)
+add_custom_command(
+    OUTPUT m68kops.c
+    COMMAND m68kmake ${CMAKE_CURRENT_BINARY_DIR}/ ${CMAKE_CURRENT_SOURCE_DIR}/m68k_in.c
+    DEPENDS m68k_in.c
+)
+
+add_executable(m68kmake m68kmake.c)
+
+add_executable(sqlux Init.c QDisk.c QL_basext.c QL_boot.c QL_cconv.c QL_config.c QL_driver.c QL_files.c QL_hardware.c QL_poll.c QL_screen.c QL_serial.c QL_sound.c QLip.c QLserio.c QLtraps.c QVFS.c SDL2screen.c Xscreen.c block.c dummies.c general.c ide.c iexl_general.c instructions_ao.c instructions_pz.c mach_exception.c memaccess.c pty.c qmtrap.c script.c trace.c unixstuff.c uqlx_cfg.c util.c uxfile.c version.c vl.c vm.c xc68.c xcodes.c xipc.c xlmain.c xqlmouse.c qlux_memaccess.c m68kcpu.c softfloat/softfloat.c ${CMAKE_CURRENT_BINARY_DIR}/m68kops.c)
 target_link_libraries(sqlux m ${SDL2_LIBRARIES})
 
