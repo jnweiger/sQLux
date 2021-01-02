@@ -15,6 +15,9 @@
 #include "qx_proto.h"
 #include "QL_screen.h"
 
+#include "qlux_memaccess.h"
+#include "m68k.h"
+
 /*extern int schedCount;*/
 extern int HasPTR;
 
@@ -273,23 +276,15 @@ void trap4(void)
 }
 #endif
 
-#if 1
-void FastStartup(void)
+void FastStartup(int hook_pc)
 {	
-  if((Ptr)gPC-(Ptr)theROM-2!=RL(&theROM[1]))
-    {
-      exception=4;
-      extraFlag=true;
-      nInst2=nInst;
-      nInst=0;
-      return;
-    }
+    memset((void *)theROM + 131072L, 0, RTOP-131072L);
 
-  memset((Ptr)theROM+131072l,0,RTOP-131072l);
+    while (m68k_read_memory_32(hook_pc) != 0x28000L)
+        hook_pc++;
+    hook_pc -= 8;
 
-  while(RL((w32*)gPC)!=0x28000l) gPC++;
-  gPC-=4;
-  aReg[5]=RTOP;
+    m68k_set_reg(M68K_REG_PC, hook_pc);
+    m68k_set_reg(M68K_REG_A5, RTOP);
 }
 
-#endif

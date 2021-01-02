@@ -37,6 +37,8 @@
 #include "uxfile.h"
 #include "SDL2screen.h"
 
+#include "m68k.h"
+
 #define TIME_DIFF    283996800
 void GetDateTime(w32 *);
 long long qlClock = 0;
@@ -992,8 +994,6 @@ void uqlxInit ()
       qlux_table[IPCR_CMD_CODE] = ReadIPC;
       qlux_table[IPCW_CMD_CODE] = WriteIPC;
       qlux_table[KEYTRANS_CMD_CODE] = QL_KeyTrans;
-      
-      qlux_table[FSTART_CMD_CODE] = FastStartup;
    }
    qlux_table[ROMINIT_CMD_CODE] = InitROM;
    qlux_table[MDVIO_CMD_CODE] = MdvIO;
@@ -1055,7 +1055,10 @@ void uqlxInit ()
       reg[1]=RTOP&((~16383) | 1 | 2 | 4 | 16);
       SetPC(0x186);
    }
-  
+    m68k_init();
+    m68k_set_cpu_type(M68K_CPU_TYPE_68000);
+    m68k_pulse_reset();
+
    QLdone = 0;
 }
 
@@ -1071,7 +1074,9 @@ void QLRun(void)
       exec:
 #endif
 
-   ExecuteChunk(3000);
+   //ExecuteChunk(3000);
+    m68k_execute(3000);
+    //exit(0);
 
 #ifdef UX_WAIT
    if (run_reaper)

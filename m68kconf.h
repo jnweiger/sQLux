@@ -138,8 +138,8 @@
  * You should put OPT_SPECIFY_HANDLER here if you cant to use it, otherwise it will
  * use a dummy default handler and you'll have to call m68k_set_illg_instr_callback explicitely
  */
-#define M68K_ILLG_HAS_CALLBACK	    OPT_OFF
-#define M68K_ILLG_CALLBACK(opcode)  op_illg(opcode)
+#define M68K_ILLG_HAS_CALLBACK	    OPT_SPECIFY_HANDLER
+#define M68K_ILLG_CALLBACK(opcode)  qlux_illg_hook(opcode)
 
 /* If ON, CPU will call the set fc callback on every memory access to
  * differentiate between user/supervisor, program/data access like a real
@@ -161,9 +161,9 @@
 /* If ON, CPU will call the instruction hook callback before every
  * instruction.
  */
-#define M68K_INSTRUCTION_HOOK       OPT_OFF
-#define M68K_INSTRUCTION_CALLBACK(pc) your_instruction_hook_function(pc)
-
+#define M68K_INSTRUCTION_HOOK       OPT_SPECIFY_HANDLER
+#define M68K_INSTRUCTION_CALLBACK(pc) qlux_pc_hook(pc)
+void qlux_pc_hook(int pc);
 
 /* If ON, the CPU will emulate the 4-byte prefetch queue of a real 68000 */
 #define M68K_EMULATE_PREFETCH       OPT_OFF
@@ -182,7 +182,7 @@
  */
 #define M68K_LOG_ENABLE             OPT_OFF
 #define M68K_LOG_1010_1111          OPT_OFF
-#define M68K_LOG_FILEHANDLE         some_file_handle
+#define M68K_LOG_FILEHANDLE         stderr
 
 /* Emulate PMMU : if you enable this, there will be a test to see if the current chip has some enabled pmmu added to every memory access,
  * so enable this only if it's useful */

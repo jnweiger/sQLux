@@ -13,7 +13,13 @@
 
 static void *m68k_calc_addr(unsigned int addr)
 {
-    return theROM + addr;
+    void *res;
+
+    res = (void *)theROM + addr;
+
+    //printf("%p\n", res);
+
+    return res;
 }
 
 unsigned int m68k_read_memory_8(unsigned int addr)
@@ -33,7 +39,11 @@ unsigned int m68k_read_memory_8(unsigned int addr)
 
 unsigned int m68k_read_memory_16(unsigned int addr)
 {
+    unsigned int res;
+
     addr &=ADDR_MASK;
+
+    printf("read16 %x,", addr);
 
     if (addr > RTOP)
         return 0;
@@ -43,12 +53,19 @@ unsigned int m68k_read_memory_16(unsigned int addr)
         return ((w16)ReadHWWord(addr));
     }
 
-    return SDL_SwapBE16(*(uint16_t *)m68k_calc_addr(addr));
+    res = SDL_SwapBE16(*(uint16_t *)m68k_calc_addr(addr));
+    printf("%x\n", res);
+
+    return res;
 }
 
 unsigned int m68k_read_memory_32(unsigned int addr)
 {
+    unsigned int res;
+
     addr &= ADDR_MASK;
+
+    printf("read32 %x,", addr);
 
     if (addr > RTOP)
         return 0;
@@ -58,7 +75,10 @@ unsigned int m68k_read_memory_32(unsigned int addr)
         return ((w32)ReadWord(addr)<<16)|(uw16)ReadWord(addr+2);
     }
 
-    return SDL_SwapBE32(*(uint32_t *)m68k_calc_addr(addr));
+    res = SDL_SwapBE32(*(uint32_t *)m68k_calc_addr(addr));
+    printf("%x\n", res);
+
+    return res;
 }
 
 void m68k_write_memory_8(unsigned int addr, unsigned int val)
@@ -116,3 +136,18 @@ void m68k_write_memory_32(unsigned int addr, unsigned int val)
     }
 }
 
+void m68k_write_memory_16_direct(unsigned int addr, unsigned int val)
+{
+	if (addr > RTOP)
+		return;
+
+	*(uint16_t *)m68k_calc_addr(addr) = SDL_SwapBE16(val);
+}
+
+void m68k_write_memory_32_direct(unsigned int addr, unsigned int val)
+{
+	if (addr > RTOP)
+		return;
+
+	*(uint32_t *)m68k_calc_addr(addr) = SDL_SwapBE32(val);
+}

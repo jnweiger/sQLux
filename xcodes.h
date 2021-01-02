@@ -42,6 +42,10 @@ extern uw16 DEVPEFO_OCODE;
 #define UQLX_STR_SCRATCH    0x14400
 
 
+/* QLUX ROM Traps Codes */
+#define FSTART_CMD_CODE     0xB008
+#define ROMINIT_CMD_CODE    0xB009
+
 /* instruction opcodes */
 #define IPC_CMD_CODE        0xadc0
 #define IPCR_CMD_CODE       0xadc1
@@ -50,10 +54,8 @@ extern uw16 DEVPEFO_OCODE;
 #define MDVW_CMD_CODE       0xadc4
 #define MDVV_CMD_CODE       0xadc5
 #define MDVH_CMD_CODE       0xadc6
-#define FSTART_CMD_CODE     0xadc7
 #define KEYTRANS_CMD_CODE   0xadc8
 
-#define ROMINIT_CMD_CODE    0xaaa0
 #define MDVIO_CMD_CODE      0xaaa1
 #define MDVO_CMD_CODE       0xaaa2
 #define MDVC_CMD_CODE       0xaaa3

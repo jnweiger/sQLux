@@ -12,7 +12,6 @@ void WriteMdvSector(void);
 void VerifyMdvSector(void);
 void ReadMdvHeader(void);
 
-void FastStartup(void);
 void MdvIO(void);
 void MdvOpen(void);
 void MdvClose(void);
