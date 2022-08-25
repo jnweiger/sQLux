@@ -41,3 +41,4 @@ void ChangedMemory(uint32_t from, uint32_t to);
 #define QL_EXTERNAL_IO_BASE     0x1C000
 #define QL_EXTERNAL_IO_SIZE     0x4000
 #define QL_SCREEN_BASE          0x20000
+#define QL_RAM_BASE             0x30000

@@ -8,6 +8,9 @@
 #include <math.h>
 #include <SDL.h>
 #include <string.h>
+#ifndef _WIN32
+#include <sys/mman.h>
+#endif
 
 #include "debug.h"
 #include "QL_hardware.h"
@@ -1201,6 +1204,9 @@ Uint32 QLSDL50Hz(Uint32 interval, void *param)
 
 	if (screenWritten && renderer_idle) {
 		screenWritten = false;
+#ifndef _WIN32
+		mprotect((uint8_t *)memBase + qlscreen.qm_lo, qlscreen.qm_len, PROT_READ);
+#endif
 		event.user.type = SDL_USEREVENT;
 		event.user.code = USER_CODE_SCREENREFRESH;
 		event.user.data1 = NULL;

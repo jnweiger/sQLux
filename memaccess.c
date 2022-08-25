@@ -17,22 +17,19 @@ void ChangedMemory(uint32_t from, uint32_t to)
 		screenWritten = true;
 }
 
+#ifdef _WIN32
 static void check_screen(uint32_t addr)
 {
 	if ((addr >= qlscreen.qm_lo) && (addr < qlscreen.qm_hi)) {
 		screenWritten = true;
 	}
 }
+#endif
 
 static int is_hw(uint32_t addr)
 {
 	if ((addr >= QL_INTERNAL_IO_BASE) &&
         	(addr < (QL_INTERNAL_IO_BASE + QL_INTERNAL_IO_SIZE))) {
-		return 1;
-	}
-
-	if ((addr >= QL_EXTERNAL_IO_BASE) &&
-		( addr < (QL_EXTERNAL_IO_BASE + QL_EXTERNAL_IO_SIZE))) {
 		return 1;
 	}
 
@@ -92,7 +89,9 @@ void WriteByte(aw32 addr,aw8 d)
 		WriteHWByte(addr, d);
 	} else if (addr >= QL_SCREEN_BASE) {
 		*((w8 *)memBase + addr) = d;
+#ifdef _WIN32
 		check_screen(addr);
+#endif
 	}
 }
 
@@ -107,7 +106,9 @@ void WriteWord(aw32 addr,aw16 d)
 		WriteHWWord(addr, d);
 	} else if (addr >= QL_SCREEN_BASE) {
 		WW((Ptr)memBase + addr, d);
+#ifdef _WIN32
 		check_screen(addr);
+#endif
 	}
 }
 
@@ -123,7 +124,6 @@ void WriteLong(aw32 addr,aw32 d)
 		WriteHWWord(addr + 2, d);
 	} else if (addr >= QL_SCREEN_BASE) {
 		WL((Ptr)memBase + addr, d);
-		check_screen(addr);
 	}
 }
 

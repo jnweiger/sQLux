@@ -18,12 +18,16 @@ extern "C" {
     #include "QL_hardware.h"
     #include "QL_screen.h"
     #include "QL_sound.h"
+    #include "signal.h"
     #include "SDL2screen.h"
     #include "unixstuff.h"
     #include "uqlx_cfg.h"
     #include "version.h"
     #include "xcodes.h"
     #include "xqlmouse.h"
+#ifndef _WIN32
+    #include "sys/mman.h"
+#endif
 
     // Temp here until full migration
     extern uint32_t *memBase;
@@ -38,6 +42,42 @@ extern "C" {
 namespace emulator
 {
 using namespace std;
+
+#ifndef _WIN32
+void sigHandler (int signal_number, siginfo_t* siginfo, void* uap)
+{
+	screenWritten = true;
+	mprotect ((uint8_t *)memBase + qlscreen.qm_lo, qlscreen.qm_len, PROT_READ | PROT_WRITE);
+}
+
+void *allocMemProt(int size)
+{
+	struct sigaction sa;
+	int ret;
+
+	void *mem = mmap(NULL, size, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
+	if (mem == MAP_FAILED) {
+		cout << "mmap failed: " << errno << "\n";
+		return NULL;
+	}
+
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_sigaction = &sigHandler;
+	sa.sa_flags = SA_SIGINFO | SA_ONSTACK;
+#ifdef __APPLE__
+	sigaction(SIGBUS, &sa, NULL);
+#else
+	sigaction(SIGSEGV, &sa, NULL);
+#endif
+
+	ret = mprotect((uint8_t *)mem, qlscreen.qm_lo, PROT_READ | PROT_WRITE);
+	ret = mprotect((uint8_t *)mem + qlscreen.qm_lo, qlscreen.qm_len, PROT_READ);
+	ret = mprotect((uint8_t *)mem + qlscreen.qm_hi, RTOP - qlscreen.qm_hi, PROT_READ | PROT_WRITE);
+
+	return mem;
+
+}
+#endif
 
 void loadRom(string name, uint32_t addr, int size)
 {
@@ -65,6 +105,7 @@ void init()
 	char *rf;
 	int rl = 0;
 	void *tbuff;
+	int ramTop;
 
 	if (V1)
 		cout << "*** sQLux release " << release << "\n\n";
@@ -72,17 +113,61 @@ void init()
 	tzset();
 
 	if (optionInt("RAMSIZE")) {
-		RTOP = (128 + optionInt("RAMSIZE")) * 1024;
+		ramTop = (128 + optionInt("RAMSIZE")) * 1024;
 	} else {
-		RTOP = optionInt("RAMTOP") * 1024;
+		ramTop = optionInt("RAMTOP") * 1024;
 	}
 
-	if (RTOP < (256 * 1024)) {
+	if (ramTop < (256 * 1024)) {
 		cout << "Sorry not enough ram defined for QDOS " << (RTOP / 1024) - 128 <<"K\n";
 		exit(1);
 	}
 
-	memBase = (uint32_t *)malloc(RTOP);
+	/* Minerva cannot handle more than 16M of memory... */
+	if (isMinerva && ramTop > 16384 * 1024)
+		ramTop = 16384 * 1024;
+	/* ...everything else not more than 4M */
+	if (!isMinerva && ramTop > 4096 * 1024)
+		ramTop = 4096 * 1024;
+
+	RTOP = ramTop;
+
+	if (isMinerva) {
+		qlscreen.xres = qlscreen.xres & (~(7));
+		qlscreen.linel = qlscreen.xres / 4;
+		qlscreen.qm_len = qlscreen.linel * qlscreen.yres;
+
+		qlscreen.qm_lo = 128 * 1024;
+		qlscreen.qm_hi = 128 * 1024 + qlscreen.qm_len;
+		if (qlscreen.qm_len > 0x8000) {
+			if ((RTOP - qlscreen.qm_len) <
+			    256 * 1024 + 8192) {
+				printf("sorry, not enough RAM for such a big screen\n");
+				goto bsfb;
+			}
+			qlscreen.qm_lo = ((RTOP - qlscreen.qm_len) >> 15)
+					 << 15; /* RTOP MUST BE 32K aligned.. */
+			qlscreen.qm_hi = qlscreen.qm_lo + qlscreen.qm_len;
+			RTOP = qlscreen.qm_lo;
+		}
+	} else /* JS doesn't handle big screen */
+	{
+	bsfb:
+		qlscreen.linel = 128;
+		qlscreen.yres = 256;
+		qlscreen.xres = 512;
+
+		qlscreen.qm_lo = 128 * 1024;
+		qlscreen.qm_hi = 128 * 1024 + 32 * 1024;
+		qlscreen.qm_len = 0x8000;
+	}
+
+#ifdef _WIN32
+	memBase = (uint32_t *)malloc(ramTop);
+#else
+	memBase = (uint32_t *)allocMemProt(ramTop);
+#endif
+
 	if (memBase == NULL) {
         cout << "sorry, not enough memory for a " << RTOP/1024 << "K QL\n";
 		exit(1);
@@ -150,44 +235,6 @@ void init()
 	init_iso();
 
 	LoadMainRom(); /* patch QDOS ROM*/
-
-	/* Minerva cannot handle more than 16M of memory... */
-	if (isMinerva && RTOP > 16384 * 1024)
-		RTOP = 16384 * 1024;
-	/* ...everything else not more than 4M */
-	if (!isMinerva && RTOP > 4096 * 1024)
-		RTOP = 4096 * 1024;
-
-	if (isMinerva) {
-		qlscreen.xres = qlscreen.xres & (~(7));
-		qlscreen.linel = qlscreen.xres / 4;
-		qlscreen.qm_len = qlscreen.linel * qlscreen.yres;
-
-		qlscreen.qm_lo = 128 * 1024;
-		qlscreen.qm_hi = 128 * 1024 + qlscreen.qm_len;
-		if (qlscreen.qm_len > 0x8000) {
-			if (((long)RTOP - qlscreen.qm_len) <
-			    256 * 1024 + 8192) {
-				/*RTOP+=qlscreen.qm_len;*/
-				printf("sorry, not enough RAM for such a big screen\n");
-				goto bsfb;
-			}
-			qlscreen.qm_lo = ((RTOP - qlscreen.qm_len) >> 15)
-					 << 15; /* RTOP MUST BE 32K aligned.. */
-			qlscreen.qm_hi = qlscreen.qm_lo + qlscreen.qm_len;
-			RTOP = qlscreen.qm_lo;
-		}
-	} else /* JS doesn't handle big screen */
-	{
-	bsfb:
-		qlscreen.linel = 128;
-		qlscreen.yres = 256;
-		qlscreen.xres = 512;
-
-		qlscreen.qm_lo = 128 * 1024;
-		qlscreen.qm_hi = 128 * 1024 + 32 * 1024;
-		qlscreen.qm_len = 0x8000;
-	}
 
 	if (V1 && (optionFloat("SPEED") > 0.0))
 		printf("Emulation Speed: %.1f\n", optionFloat("SPEED"));
