@@ -28,8 +28,7 @@ static void check_screen(uint32_t addr)
 
 static int is_hw(uint32_t addr)
 {
-	if ((addr >= QL_INTERNAL_IO_BASE) &&
-        	(addr < (QL_INTERNAL_IO_BASE + QL_INTERNAL_IO_SIZE))) {
+	if ((addr & QL_IO_MASK) == QL_INTERNAL_IO_BASE) {
 		return 1;
 	}
 
